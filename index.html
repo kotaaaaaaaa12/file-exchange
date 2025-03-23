@@ -18,9 +18,10 @@
     <input type="file" id="fileInput" multiple>
     <button id="convertBtn">変換する</button>
     
-    <h2>変換済みファイル</h2>
+    <h2>変換進行状況</h2>
+    <progress id="overallProgress" value="0" max="100" style="width: 100%;"></progress>
     <ul id="fileList"></ul>
-    
+
     <button id="downloadAllBtn" style="display: none;">すべてZIPでダウンロード</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
