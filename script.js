@@ -27,13 +27,20 @@ document.getElementById('convertBtn').addEventListener('click', async () => {
     const inputFormat = document.getElementById('inputFormat').value;
     const outputFormat = document.getElementById('outputFormat').value;
     const inputFiles = document.getElementById('fileInput').files;
+    const fileList = document.getElementById("fileList");
+    const downloadAllBtn = document.getElementById("downloadAllBtn");
 
     if (inputFiles.length === 0) {
         alert("ファイルを選択してください");
         return;
     }
 
+    fileList.innerHTML = "";
+    downloadAllBtn.style.display = "none";
+
     await ffmpeg.load();
+
+    const convertedFiles = [];
 
     for (let file of inputFiles) {
         const inputName = file.name;
@@ -51,11 +58,35 @@ document.getElementById('convertBtn').addEventListener('click', async () => {
         const blob = new Blob([data.buffer], { type: `video/${outputFormat}` });
         const url = URL.createObjectURL(blob);
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = outputName;
-        a.textContent = `ダウンロード: ${outputName}`;
-        document.getElementById('output').appendChild(a);
-        document.getElementById('output').appendChild(document.createElement('br'));
+        convertedFiles.push({ name: outputName, blob });
+
+        const listItem = document.createElement("li");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = outputName;
+        downloadLink.textContent = `ダウンロード: ${outputName}`;
+        listItem.appendChild(downloadLink);
+        fileList.appendChild(listItem);
+    }
+
+    if (convertedFiles.length > 0) {
+        downloadAllBtn.style.display = "block";
+        downloadAllBtn.onclick = () => downloadAllAsZip(convertedFiles);
     }
 });
+
+function downloadAllAsZip(files) {
+    const zip = new JSZip();
+    files.forEach(file => {
+        zip.file(file.name, file.blob);
+    });
+
+    zip.generateAsync({ type: "blob" }).then(content => {
+        const zipBlob = new Blob([content], { type: "application/zip" });
+        const zipUrl = URL.createObjectURL(zipBlob);
+        const a = document.createElement("a");
+        a.href = zipUrl;
+        a.download = "converted_files.zip";
+        a.click();
+    });
+}
