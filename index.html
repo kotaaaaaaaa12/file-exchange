@@ -17,10 +17,14 @@
 
     <input type="file" id="fileInput" multiple>
     <button id="convertBtn">変換する</button>
-
-    <div id="output"></div>
+    
+    <h2>変換済みファイル</h2>
+    <ul id="fileList"></ul>
+    
+    <button id="downloadAllBtn" style="display: none;">すべてZIPでダウンロード</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
