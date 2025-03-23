@@ -28,6 +28,7 @@ document.getElementById('convertBtn').addEventListener('click', async () => {
     const outputFormat = document.getElementById('outputFormat').value;
     const inputFiles = document.getElementById('fileInput').files;
     const fileList = document.getElementById("fileList");
+    const overallProgress = document.getElementById("overallProgress");
     const downloadAllBtn = document.getElementById("downloadAllBtn");
 
     if (inputFiles.length === 0) {
@@ -37,10 +38,12 @@ document.getElementById('convertBtn').addEventListener('click', async () => {
 
     fileList.innerHTML = "";
     downloadAllBtn.style.display = "none";
+    overallProgress.value = 0;
 
     await ffmpeg.load();
 
     const convertedFiles = [];
+    let completedFiles = 0;
 
     for (let file of inputFiles) {
         const inputName = file.name;
@@ -51,22 +54,42 @@ document.getElementById('convertBtn').addEventListener('click', async () => {
 
         const outputName = inputName.replace(`.${inputFormat}`, `.${outputFormat}`);
 
-        ffmpeg.FS('writeFile', inputName, await fetchFile(file));
-        await ffmpeg.run('-i', inputName, outputName);
-        const data = ffmpeg.FS('readFile', outputName);
+        // 進捗バーを追加
+        const listItem = document.createElement("li");
+        listItem.textContent = `変換中: ${inputName} → ${outputName}`;
+        const progressBar = document.createElement("progress");
+        progressBar.value = 0;
+        progressBar.max = 100;
+        listItem.appendChild(progressBar);
+        fileList.appendChild(listItem);
 
+        ffmpeg.FS('writeFile', inputName, await fetchFile(file));
+
+        const logCallback = ({ type, message }) => {
+            if (type === 'progress') {
+                let progress = Math.min(100, Math.floor(message.percent * 100));
+                progressBar.value = progress;
+            }
+        };
+
+        await ffmpeg.run('-i', inputName, outputName, { log: logCallback });
+
+        const data = ffmpeg.FS('readFile', outputName);
         const blob = new Blob([data.buffer], { type: `video/${outputFormat}` });
         const url = URL.createObjectURL(blob);
 
         convertedFiles.push({ name: outputName, blob });
 
-        const listItem = document.createElement("li");
+        // 変換完了時にダウンロードリンクを表示
+        listItem.innerHTML = "";
         const downloadLink = document.createElement("a");
         downloadLink.href = url;
         downloadLink.download = outputName;
         downloadLink.textContent = `ダウンロード: ${outputName}`;
         listItem.appendChild(downloadLink);
-        fileList.appendChild(listItem);
+
+        completedFiles++;
+        overallProgress.value = (completedFiles / inputFiles.length) * 100;
     }
 
     if (convertedFiles.length > 0) {
