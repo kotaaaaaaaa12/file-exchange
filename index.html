@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>動画変換ツール</title>
+    <title>マルチファイル変換ツール</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>動画変換ツール（MTS → MP4）</h1>
-    <input type="file" id="fileInput" accept=".mts" multiple>
+    <h1>マルチファイル変換ツール</h1>
+
+    <label for="inputFormat">変換前の拡張子:</label>
+    <select id="inputFormat"></select>
+
+    <label for="outputFormat">変換後の拡張子:</label>
+    <select id="outputFormat"></select>
+
+    <input type="file" id="fileInput" multiple>
     <button id="convertBtn">変換する</button>
+
     <div id="output"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
